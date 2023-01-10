@@ -22,8 +22,9 @@ public class ProviderController {
 	@ResponseBody
 	public String add()
 	{
-		Provider p = new Provider("samsung","samsung@gmail.com","korea");
-		providerRepository.save(p);
+		Provider p = new Provider("orange","orange@hotmail.com","france");
+		Provider res = providerRepository.save(p);
+		System.out.println(res.toString());
 		return "Success";
 	}
 }
