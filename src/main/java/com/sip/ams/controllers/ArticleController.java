@@ -113,19 +113,40 @@ public class ArticleController {
     }
     @PostMapping("edit/{id}")
     public String updateArticle(@PathVariable("id") long id, @Valid Article article, BindingResult result,
-        Model model, @RequestParam(name = "providerId", required = false) Long p) {
+        Model model, @RequestParam(name = "providerId", required = false) Long p
+        ,@RequestParam("files") MultipartFile[] files
+    		) {
         if (result.hasErrors()) {
         	article.setId(id);
             return "article/updateArticle";
         }
-        
+        //System.out.println("image = " +article.getPicture());
         Provider provider = providerRepository.findById(p)
                 .orElseThrow(()-> new IllegalArgumentException("Invalid provider Id:" + p));
     	article.setProvider(provider);
     	
+    	/// part upload file
+    
+    		
+    	StringBuilder fileName = new StringBuilder();
+    	MultipartFile file = files[0];
+    	//System.out.println(file.isEmpty());
+    	if(!file.isEmpty()) {
+    	Path fileNameAndPath = Paths.get(uploadDirectory, file.getOriginalFilename());
+    	
+    	fileName.append(file.getOriginalFilename());
+		  try {
+			Files.write(fileNameAndPath, file.getBytes());
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
+		  article.setPicture(fileName.toString());
+    	}
+		
+    	
+    	// Fin Upload file
         articleRepository.save(article);
-        model.addAttribute("articles", articleRepository.findAll());
-        return "article/listArticles";
+        return "redirect:../list";
     }
     
     @GetMapping("show/{id}")
